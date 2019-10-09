@@ -23,6 +23,13 @@ class Vector2Int:
         return Vector2Int(x-1, y-1)
 
     @classmethod
+    def to_battleship_coord(cls, input_value):
+        alpha = "abcdefghijklmnopqrstuvwxyz"
+        coord = alpha[input_value.x]
+        coord += str(input_value.y+1)
+        return coord
+
+    @classmethod
     def is_coordinate(cls, input_value: str):
         if len(input_value) < 2:
             return False

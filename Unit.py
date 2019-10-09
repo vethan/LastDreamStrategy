@@ -21,6 +21,7 @@ class Unit(TimelineObject):
         self.move = move
         self.team = team
         self.game = game
+        self.char ="u"
         self.max_hp = max_hp
         self.evade = eva
         self.faith = faith
@@ -33,8 +34,9 @@ class Unit(TimelineObject):
         self.actions = []
 
     def __str__(self):
-        return "Team " + str(self.team) + " " + self.name + "[" + str(self.hp) + "/" + str(self.max_hp) + "] " + str(
-            self.position)
+        return self.name + "(" + self.char + ")" + "[" + str(self.hp) + "/" + str(
+            self.max_hp) + "] " + str(
+            Vector2Int.Vector2Int.to_battleship_coord(self.position))
 
     def flatten(self, listOfLists):
         return list(chain.from_iterable(listOfLists))

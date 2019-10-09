@@ -17,7 +17,8 @@ class Cleric(Unit):
                  name: str,
                  team: int,
                  game: Game,
-                 start_position: Vector2Int):
+                 start_position: Vector2Int,
+                 char: str = 'c'):
         super().__init__(name=name,
                          speed=9,
                          move=3,
@@ -29,7 +30,7 @@ class Cleric(Unit):
                          team=team,
                          game=game,
                          start_position=start_position)
-
+        self.char = char
         self.action_taken = False
         self.move_used = False
         self.actions.append(BasicAttackAction(weapon=Weapon.Staff(3), owner=self))

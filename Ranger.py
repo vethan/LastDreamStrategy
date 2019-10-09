@@ -15,7 +15,8 @@ class Ranger(Unit.Unit):
                  name: str,
                  team: int,
                  game,
-                 start_position: Vector2Int):
+                 start_position: Vector2Int,
+                 char: str = 'r'):
         super().__init__(name=name,
                          speed=9,
                          move=3,
@@ -28,6 +29,7 @@ class Ranger(Unit.Unit):
                          game=game,
                          start_position=start_position)
 
+        self.char = char
         self.action_taken = False
         self.move_used = False
         self.actions.append(BasicAttackAction.BasicAttackAction(weapon=Weapon.Bow(5), owner=self))

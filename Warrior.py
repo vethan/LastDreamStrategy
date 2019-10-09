@@ -14,7 +14,8 @@ class Warrior(Unit.Unit):
                  name: str,
                  team: int,
                  game,
-                 start_position: Vector2Int):
+                 start_position: Vector2Int,
+                 char: str = 'w'):
         super().__init__(name=name,
                          speed=8,
                          move=3,
@@ -27,6 +28,7 @@ class Warrior(Unit.Unit):
                          game=game,
                          start_position=start_position)
 
+        self.char = char
         self.defending = False
         self.action_taken = False
         self.move_used = False

@@ -55,6 +55,37 @@ class Game:
         for unit in self.units:
             unit.CT = random.randint(0, 20)
 
+    def draw_border(self):
+        line = "-+"
+        for i in range(0,self.map_width):
+            line += "---+"
+
+        print(line)
+
+    def draw_grid(self):
+        #draw header
+        alphabet = "abcdefghijklmnopqrstuvwxyz"
+        line = " |"
+        for i in range(0,self.map_width):
+            line += " " + alphabet[i] + " |"
+        print(line)
+        self.draw_border()
+        for y in range(0,self.map_height):
+            line = str(y+1) + "|"
+            for x in range(0,self.map_width):
+                unitHere = None
+                for unit in self.units:
+                    if unit.position == Vector2Int(x,y):
+                        unitHere = unit
+                if unitHere:
+                    line += " "+ unitHere.char +" |"
+                else:
+                    line += "   |"
+            print(line)
+            self.draw_border()
+
+
+
 
 def handle_unit_move(unit: Unit):
     while True:
@@ -102,7 +133,7 @@ def handle_unit_action(unit: Unit):
 
 def handle_unit_turn(team: int, unit: Unit, game: Game):
     while True:
-        print(unit.name + " turn")
+        print(unit.name  + "("+unit.char+")"+ " turn")
         if unit.action_taken and unit.move_used:
             return
         elif unit.move_used:
@@ -130,22 +161,22 @@ def handle_unit_turn(team: int, unit: Unit, game: Game):
 
 def main():
     game = Game(7, 7, handle_unit_turn)
-    unit = Warrior.Warrior(name="Warrior 1", team=0, start_position=Vector2Int(1, 2), game=game)
+    unit = Warrior.Warrior(name="Warrior 1", team=0, start_position=Vector2Int(1, 2), game=game, char='w')
     game.add_unit(unit)
 
-    unit = Cleric.Cleric(name="Cleric 1", team=0, start_position=Vector2Int(0, 1), game=game)
+    unit = Cleric.Cleric(name="Cleric 1", team=0, start_position=Vector2Int(0, 1), game=game, char='c')
     game.add_unit(unit)
 
-    unit = Mage.Mage(name="Mage 1", team=0, start_position=Vector2Int(0, 0), game=game)
+    unit = Mage.Mage(name="Mage 1", team=0, start_position=Vector2Int(0, 0), game=game, char='m')
     game.add_unit(unit)
 
-    unit = Warrior.Warrior(name="Warrior 2", team=1, start_position=Vector2Int(3, 3), game=game)
+    unit = Warrior.Warrior(name="Warrior 2", team=1, start_position=Vector2Int(3, 3), game=game, char='W')
     game.add_unit(unit)
 
-    unit = Cleric.Cleric(name="Cleric 2", team=1, start_position=Vector2Int(4, 2), game=game)
+    unit = Cleric.Cleric(name="Cleric 2", team=1, start_position=Vector2Int(4, 2), game=game, char='C')
     game.add_unit(unit)
 
-    unit = Mage.Mage(name="Mage 2", team=1, start_position=Vector2Int(4, 4), game=game)
+    unit = Mage.Mage(name="Mage 2", team=1, start_position=Vector2Int(4, 4), game=game, char='M')
     game.add_unit(unit)
 
     game.roll_initiative()
@@ -153,6 +184,7 @@ def main():
     while True:
         game.advance()
         cls()
+        game.draw_grid()
         input(game.turn_order_string())
 
 

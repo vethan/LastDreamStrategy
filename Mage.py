@@ -17,7 +17,8 @@ class Mage(Unit.Unit):
                  name: str,
                  team: int,
                  game,
-                 start_position: Vector2Int):
+                 start_position: Vector2Int,
+                 char: str = 'm'):
         super().__init__(name=name,
                          speed=8,
                          move=3,
@@ -29,7 +30,7 @@ class Mage(Unit.Unit):
                          team=team,
                          game=game,
                          start_position=start_position)
-
+        self.char = char
         self.action_taken = False
         self.move_used = False
         self.actions.append(BasicAttackAction(weapon=Weapon.Rod(3), owner=self))
