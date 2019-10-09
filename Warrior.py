@@ -1,5 +1,6 @@
 import BasicAttackAction
 import Unit
+import Weapon
 from Vector2Int import Vector2Int
 
 
@@ -18,6 +19,10 @@ class Warrior(Unit.Unit):
                          speed=8,
                          move=3,
                          max_hp=279,
+                         eva=10,
+                         faith=55,
+                         p_attack=16,
+                         m_attack=6,
                          team=team,
                          game=game,
                          start_position=start_position)
@@ -25,7 +30,7 @@ class Warrior(Unit.Unit):
         self.defending = False
         self.action_taken = False
         self.move_used = False
-        self.actions.append(BasicAttackAction.BasicAttackAction(damage=80, max_range=1, owner=self))
+        self.actions.append(BasicAttackAction.BasicAttackAction(weapon=Weapon.Sword(5,0), owner=self))
         self.actions.append(DefendAction(self))
 
     def defend(self):
@@ -52,12 +57,12 @@ class DefendAction:
         self.owner = owner
 
     def get_target_action_list(self):
-        result = [DefendTarget(self)]
+        result = [DefendTarget(self, self.owner)]
         return result
 
 
 class DefendTarget:
-    def __init__(self, target, owner: BasicAttackAction):
+    def __init__(self, target, owner: Unit):
         self.target = target
         self.owner = owner
 

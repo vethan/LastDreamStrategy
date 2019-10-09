@@ -9,6 +9,10 @@ class Unit(TimelineObject):
                  name: str,
                  move: int,
                  speed: int,
+                 eva: int,
+                 faith: int,
+                 p_attack: int,
+                 m_attack: int,
                  team: int,
                  max_hp: int,
                  game,
@@ -18,6 +22,10 @@ class Unit(TimelineObject):
         self.team = team
         self.game = game
         self.max_hp = max_hp
+        self.evade = eva
+        self.faith = faith
+        self.p_attack = p_attack
+        self.m_attack = m_attack
         self.hp = max_hp
         self.position = start_position.clone()
         self.action_taken = False
