@@ -1,27 +1,84 @@
 import os
 
 import neat
+import numpy
+
+import AuthoredAI.WarriorAI
 import Game
+import Unit.Warrior
+import Vector2Int
 
 # 2-input XOR inputs and expected outputs.
 xor_inputs = [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0), (1.0, 1.0)]
 xor_outputs = [(0.0,), (1.0,), (1.0,), (0.0,)]
 
 
+def setup_game(net):
+    game = Game.Game(7, 7, lambda team, unit, game: handle_turn(team, unit, game, net))
+    unit = Unit.Warrior.Warrior(name="Warrior 1", team=0,
+                                start_position=Vector2Int.Vector2Int.from_battleship_coord("b1"),
+                                game=game, char='w')
+    unit.ai = None
+    game.add_unit(unit)
+
+    unit = Unit.Warrior.Warrior(name="Warrior 1", team=0,
+                                start_position=Vector2Int.Vector2Int.from_battleship_coord("a2"),
+                                game=game,
+                                char='w')
+    unit.ai = None
+    game.add_unit(unit)
+
+    unit = Unit.Warrior.Warrior(name="Warrior 2", team=1,
+                                start_position=Vector2Int.Vector2Int.from_battleship_coord("g6"),
+                                game=game,
+                                char='W')
+    unit.ai = AuthoredAI.WarriorAI.WarriorAI(unit, game)
+    game.add_unit(unit)
+
+    unit = Unit.Warrior.Warrior(name="Warrior 2", team=1,
+                                start_position=Vector2Int.Vector2Int.from_battleship_coord("f7"),
+                                game=game,
+                                char='W')
+    unit.ai = AuthoredAI.WarriorAI.WarriorAI(unit, game)
+    game.add_unit(unit)
+    return game
+
+
 def eval_genomes(genomes, config):
     for genome_id, genome in genomes:
-        genome.fitness = 4.0
-        net = neat.nn.FeedForwardNetwork.create(genome, config)
-        game = Game.Game(7, 7, lambda team, unit, game: handle_turn(team, unit, game, net))
 
-        for xi, xo in zip(xor_inputs, xor_outputs):
-            while game.running:
-                game.advance()
-            output = net.activate(xi)
-            genome.fitness -= (output[0] - xo[0]) ** 2
+        net = neat.nn.FeedForwardNetwork.create(genome, config)
+        game = setup_game(net)
+        while game.running:
+            game.advance()
+
+        genome.fitness = 0
+        for unit in game.units:
+            if unit.team == 0:
+                genome.fitness += unit.hp
+            else:
+                genome.fitness -= unit.hp
 
 
 def handle_turn(team, unit, game, net):
+    if unit.ai is not None:
+        unit.ai.decide_turn_action()
+        return
+
+    enemy_health_percents = numpy.zeros([7, 7])
+    ally_health_percents = numpy.zeros([7, 7])
+    my_position = numpy.zeros([7, 7], dtype=numpy.int8)
+    for selected in game.units:
+        if selected is unit:
+            my_position[unit.position.x][unit.position.y] = 1
+        if selected.team == team:
+            ally_health_percents[selected.position.x][selected.position.y] = selected.hp/selected.max_hp
+        else:
+            enemy_health_percents[selected.position.x][selected.position.y] = selected.hp/selected.max_hp
+
+    inputs = my_position.flatten() +ally_health_percents.flatten() + enemy_health_percents.flatten()
+
+    net.activate(inputs)
     pass
 
 

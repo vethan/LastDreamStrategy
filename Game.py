@@ -5,6 +5,7 @@ import Unit.Cleric
 import Unit.Mage
 import Unit.Ranger
 import Unit.Warrior
+import Unit.Unit
 from AuthoredAI.WarriorAI import WarriorAI
 from Vector2Int import Vector2Int
 
@@ -33,7 +34,7 @@ class Game:
             x.end_turn()
             if x.CT >= 100:
                 x.execute()
-                if not isinstance(x, Unit.Unit):
+                if not isinstance(x, Unit.Unit.Unit):
                     to_be_removed.append(x)
                 else:
                     x.end_turn()
@@ -173,7 +174,6 @@ def main():
     game = Game(7, 7, handle_unit_turn)
     unit = Unit.Warrior.Warrior(name="Warrior 1", team=0, start_position=Vector2Int(1, 2), game=game, char='w')
     unit.ai = WarriorAI(unit, game)
-
     game.add_unit(unit)
 
     unit = Unit.Cleric.Cleric(name="Cleric 1", team=0, start_position=Vector2Int(0, 1), game=game, char='c')
