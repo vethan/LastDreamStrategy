@@ -1,9 +1,12 @@
 import os
 import random
 
-from Unit import Warrior, Mage, Unit, Cleric
-from Vector2Int import Vector2Int
+import Unit.Cleric
+import Unit.Mage
+import Unit.Ranger
+import Unit.Warrior
 from AuthoredAI.WarriorAI import WarriorAI
+from Vector2Int import Vector2Int
 
 
 def cls():
@@ -168,31 +171,32 @@ def handle_unit_turn(team: int, unit: Unit, game: Game):
 
 def main():
     game = Game(7, 7, handle_unit_turn)
-    unit = Warrior.Warrior(name="Warrior 1", team=0, start_position=Vector2Int(1, 2), game=game, char='w')
+    unit = Unit.Warrior.Warrior(name="Warrior 1", team=0, start_position=Vector2Int(1, 2), game=game, char='w')
     unit.ai = WarriorAI(unit, game)
 
     game.add_unit(unit)
 
-    unit = Cleric.Cleric(name="Cleric 1", team=0, start_position=Vector2Int(0, 1), game=game, char='c')
+    unit = Unit.Cleric.Cleric(name="Cleric 1", team=0, start_position=Vector2Int(0, 1), game=game, char='c')
     unit.ai = WarriorAI(unit, game)
 
     game.add_unit(unit)
 
-    unit = Mage.Mage(name="Mage 1", team=0, start_position=Vector2Int(0, 0), game=game, char='m')
+    unit = Unit.Mage.Mage(name="Mage 1", team=0, start_position=Vector2Int(0, 0), game=game, char='m')
     unit.ai = WarriorAI(unit, game)
 
     game.add_unit(unit)
 
-    unit = Warrior.Warrior(name="Warrior 2", team=1, start_position=Vector2Int.from_battleship_coord("g7"), game=game, char='W')
+    unit = Unit.Warrior.Warrior(name="Warrior 2", team=1, start_position=Vector2Int.from_battleship_coord("g7"), game=game,
+                           char='W')
     unit.ai = WarriorAI(unit, game)
     game.add_unit(unit)
 
-    unit = Cleric.Cleric(name="Cleric 2", team=1, start_position=Vector2Int(4, 2), game=game, char='C')
+    unit = Unit.Cleric.Cleric(name="Cleric 2", team=1, start_position=Vector2Int(4, 2), game=game, char='C')
     unit.ai = WarriorAI(unit, game)
 
     game.add_unit(unit)
 
-    unit = Mage.Mage(name="Mage 2", team=1, start_position=Vector2Int(4, 4), game=game, char='M')
+    unit = Unit.Mage.Mage(name="Mage 2", team=1, start_position=Vector2Int(4, 4), game=game, char='M')
     unit.ai = WarriorAI(unit, game)
 
     game.add_unit(unit)

@@ -1,7 +1,7 @@
 import Weapon
 from Actions.BasicAttackAction import BasicAttackAction
 from Actions.BasicSpellAction import HealingSpellAction
-from Game import Game
+import Game
 from Unit.Unit import Unit
 from Vector2Int import Vector2Int
 

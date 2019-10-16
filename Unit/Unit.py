@@ -1,5 +1,6 @@
 from itertools import chain
 
+import Game
 import Vector2Int
 from TimelineObject import TimelineObject
 
@@ -15,13 +16,13 @@ class Unit(TimelineObject):
                  m_attack: int,
                  team: int,
                  max_hp: int,
-                 game,
+                 game: Game,
                  start_position: Vector2Int):
         super().__init__(name, speed)
         self.move = move
         self.team = team
         self.game = game
-        self.char ="u"
+        self.char = "u"
         self.ai = None
         self.max_hp = max_hp
         self.evade = eva
