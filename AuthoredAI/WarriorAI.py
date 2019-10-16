@@ -55,7 +55,8 @@ class WarriorAI(CharacterAI):
 
     def decide_turn_action(self):
         ordered_enemies = self.get_enemies_by_distance()
-
+        if len(ordered_enemies) == 0:
+            return
         closest_enemy = ordered_enemies[0]
         # Move towards closest enemy
         self.move_towards_unit(closest_enemy, self.unit.move)

@@ -3,18 +3,45 @@ import os
 import neat
 import numpy
 
+# 2-input XOR inputs and expected outputs.
+import Actions.BasicAttackAction
 import AuthoredAI.WarriorAI
 import Game
 import Unit.Warrior
 import Vector2Int
 
-# 2-input XOR inputs and expected outputs.
 xor_inputs = [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0), (1.0, 1.0)]
 xor_outputs = [(0.0,), (1.0,), (1.0,), (0.0,)]
 
+move_adjustments = [Vector2Int.Vector2Int(0, 3),
+                    Vector2Int.Vector2Int(-1, 2),
+                    Vector2Int.Vector2Int(0, 2),
+                    Vector2Int.Vector2Int(1, 2),
+                    Vector2Int.Vector2Int(-2, 1),
+                    Vector2Int.Vector2Int(-1, 1),
+                    Vector2Int.Vector2Int(0, 1),
+                    Vector2Int.Vector2Int(1, 1),
+                    Vector2Int.Vector2Int(2, 1),
+                    Vector2Int.Vector2Int(-3, 0),
+                    Vector2Int.Vector2Int(-2, 0),
+                    Vector2Int.Vector2Int(-1, 0),
+                    Vector2Int.Vector2Int(0, 0),
+                    Vector2Int.Vector2Int(1, 0),
+                    Vector2Int.Vector2Int(2, 0),
+                    Vector2Int.Vector2Int(3, 0),
+                    Vector2Int.Vector2Int(-2, -1),
+                    Vector2Int.Vector2Int(-1, -1),
+                    Vector2Int.Vector2Int(0, -1),
+                    Vector2Int.Vector2Int(1, -1),
+                    Vector2Int.Vector2Int(2, -1),
+                    Vector2Int.Vector2Int(-1, -2),
+                    Vector2Int.Vector2Int(0, -2),
+                    Vector2Int.Vector2Int(1, -2),
+                    Vector2Int.Vector2Int(0, -3)]
+
 
 def setup_game(net):
-    game = Game.Game(7, 7, lambda team, unit, game: handle_turn(team, unit, game, net))
+    game = Game.Game(6, 6, lambda team, unit, game: handle_turn(team, unit, game, net))
     unit = Unit.Warrior.Warrior(name="Warrior 1", team=0,
                                 start_position=Vector2Int.Vector2Int.from_battleship_coord("b1"),
                                 game=game, char='w')
@@ -29,14 +56,14 @@ def setup_game(net):
     game.add_unit(unit)
 
     unit = Unit.Warrior.Warrior(name="Warrior 2", team=1,
-                                start_position=Vector2Int.Vector2Int.from_battleship_coord("g6"),
+                                start_position=Vector2Int.Vector2Int.from_battleship_coord("f5"),
                                 game=game,
                                 char='W')
     unit.ai = AuthoredAI.WarriorAI.WarriorAI(unit, game)
     game.add_unit(unit)
 
     unit = Unit.Warrior.Warrior(name="Warrior 2", team=1,
-                                start_position=Vector2Int.Vector2Int.from_battleship_coord("f7"),
+                                start_position=Vector2Int.Vector2Int.from_battleship_coord("e6"),
                                 game=game,
                                 char='W')
     unit.ai = AuthoredAI.WarriorAI.WarriorAI(unit, game)
@@ -44,20 +71,23 @@ def setup_game(net):
     return game
 
 
-def eval_genomes(genomes, config):
-    for genome_id, genome in genomes:
+def eval_genome(genome, config, display_game=False):
+    net = neat.nn.FeedForwardNetwork.create(genome, config)
+    game = setup_game(net)
+    while game.running:
+        game.advance()
+        if display_game:
+            game.draw_grid()
+            input(game.turn_order_string())
 
-        net = neat.nn.FeedForwardNetwork.create(genome, config)
-        game = setup_game(net)
-        while game.running:
-            game.advance()
+    fitness = 0
+    for unit in game.units:
+        if unit.team == 0:
+            fitness += unit.hp
+        else:
+            fitness -= unit.hp
 
-        genome.fitness = 0
-        for unit in game.units:
-            if unit.team == 0:
-                genome.fitness += unit.hp
-            else:
-                genome.fitness -= unit.hp
+    return fitness
 
 
 def handle_turn(team, unit, game, net):
@@ -65,21 +95,55 @@ def handle_turn(team, unit, game, net):
         unit.ai.decide_turn_action()
         return
 
-    enemy_health_percents = numpy.zeros([7, 7])
-    ally_health_percents = numpy.zeros([7, 7])
-    my_position = numpy.zeros([7, 7], dtype=numpy.int8)
+    health_percents = numpy.zeros([6, 6])
+    my_position = numpy.zeros([6, 6])
     for selected in game.units:
         if selected is unit:
             my_position[unit.position.x][unit.position.y] = 1
         if selected.team == team:
-            ally_health_percents[selected.position.x][selected.position.y] = selected.hp/selected.max_hp
+            health_percents[selected.position.x][selected.position.y] = selected.hp / selected.max_hp
         else:
-            enemy_health_percents[selected.position.x][selected.position.y] = selected.hp/selected.max_hp
+            health_percents[selected.position.x][selected.position.y] = -selected.hp / selected.max_hp
 
-    inputs = my_position.flatten() +ally_health_percents.flatten() + enemy_health_percents.flatten()
+    inputs = numpy.concatenate((my_position.flatten(), health_percents.flatten()))
+    output = net.activate(inputs)
 
-    net.activate(inputs)
-    pass
+    move_options = output[1:26]
+    attack_options = output[26:]
+    move_first = output[0]
+
+    attack_grid = numpy.asarray(attack_options).reshape((6, 6))
+    attack_point = None
+    max_attack = -1000000
+    move_point = None
+    max_move = -1000000
+
+    for i in range(0, 25):
+        if move_options[i] > max_move:
+            max_move = move_options[i]
+            move_point = move_adjustments[i]
+
+    for x in range(0, 6):
+        for y in range(0, 6):
+            if attack_grid[x, y] > max_attack:
+                max_attack = attack_grid[x, y]
+                target_unit = game.get_unit_from_point(Vector2Int.Vector2Int(x, y))
+                if target_unit is not None and target_unit.team is not unit.team:
+                    attack_point = target_unit
+
+    if move_point is not None and (move_first < 0.5 or attack_point is None):
+        unit.move_to(Vector2Int.Vector2Int.add(unit.position, move_point))
+
+    if attack_point is not None:
+        dist = Vector2Int.Vector2Int.manhattan_distance(unit.position, attack_point.position)
+        if unit.weapon.min_range <= dist <= unit.weapon.max_range:
+            for action in unit.actions:
+                if isinstance(action, Actions.BasicAttackAction.BasicAttackAction):
+                    action.get_targeted_action(attack_point).select()
+                    unit.action_taken = True
+
+        if move_point is not None and not unit.move_used:
+            unit.move_to(Vector2Int.Vector2Int.add(unit.position, move_point))
 
 
 def run(config_file):
@@ -87,7 +151,11 @@ def run(config_file):
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_file)
+    pe = neat.ParallelEvaluator(4, eval_genome)
 
+    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-299')
+    winner = p.run(pe.evaluate,1)
+    eval_genome(winner, config, True)
     # Create the population, which is the top-level object for a NEAT run.
     p = neat.Population(config)
 
@@ -98,7 +166,7 @@ def run(config_file):
     p.add_reporter(neat.Checkpointer(5))
 
     # Run for up to 300 generations.
-    winner = p.run(eval_genomes, 300)
+    winner = p.run(pe.evaluate, 300)
 
     # Display the winning genome.
     print('\nBest genome:\n{!s}'.format(winner))
@@ -106,17 +174,14 @@ def run(config_file):
     # Show output of the most fit genome against training data.
     print('\nOutput:')
     winner_net = neat.nn.FeedForwardNetwork.create(winner, config)
-    for xi, xo in zip(xor_inputs, xor_outputs):
-        output = winner_net.activate(xi)
-        print("input {!r}, expected output {!r}, got {!r}".format(xi, xo, output))
+    eval_genome(winner, config, True)
 
-    node_names = {-1: 'A', -2: 'B', 0: 'A XOR B'}
     # visualize.draw_net(config, winner, True, node_names=node_names)
     # visualize.plot_stats(stats, ylog=False, view=True)
     # visualize.plot_species(stats, view=True)
 
-    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-4')
-    p.run(eval_genomes, 10)
+    # p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-4')
+    # p.run(eval_genome, 10)
 
 
 if __name__ == '__main__':

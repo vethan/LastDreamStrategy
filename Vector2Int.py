@@ -22,6 +22,10 @@ class Vector2Int:
         return result
 
     @classmethod
+    def add(cls, a, b):
+        return Vector2Int(a.x + b.x, a.y + b.y)
+
+    @classmethod
     def from_battleship_coord(cls, input_value: str):
         alpha_section = input_value[0]
         digit_section = input_value[1:]

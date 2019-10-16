@@ -27,6 +27,13 @@ class Game:
         self.timeline_objects.append(unit)
         self.units.append(unit)
 
+    def get_unit_from_point(self, point : Vector2Int):
+        for unit in self.units:
+            if unit.position == point:
+                return unit
+
+        return None
+
     def advance(self):
         self.timeline_objects.sort(key=lambda timeline_object: timeline_object.steps_to_ready())
         to_be_removed = []
@@ -53,7 +60,11 @@ class Game:
         for x in self.units:
             if x.position == position:
                 return False
+        if position.x < 0 or position.x >= self.map_width:
+            return False
 
+        if position.y < 0 or position.y >= self.map_height:
+            return False
         return True
 
     def turn_order_string(self):
