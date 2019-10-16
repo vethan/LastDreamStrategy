@@ -17,6 +17,7 @@ class Game:
         self.timeline_objects = []
         self.units = []
         self.handle_unit_action = handle_unit
+        self.running = True
 
     def add_unit(self, unit: Unit):
         self.timeline_objects.append(unit)
@@ -33,6 +34,13 @@ class Game:
                     to_be_removed.append(x)
                 else:
                     x.end_turn()
+        team1_unit = False
+        team0_unit = False
+        for unit in self.units:
+            team0_unit |= unit.team == 0
+            team1_unit |= unit.team == 1
+
+        self.running = team0_unit and team1_unit
 
         for x in to_be_removed:
             self.timeline_objects.remove(x)
@@ -191,7 +199,7 @@ def main():
 
     game.roll_initiative()
 
-    while True:
+    while game.running:
         game.advance()
         cls()
         game.draw_grid()
