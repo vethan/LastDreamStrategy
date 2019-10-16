@@ -1,12 +1,9 @@
 import os
 import random
 
-import Cleric
-import Mage
-import Unit
-import Warrior
-
+from Unit import Warrior, Mage, Unit, Cleric
 from Vector2Int import Vector2Int
+from AuthoredAI.WarriorAI import WarriorAI
 
 
 def cls():
@@ -57,34 +54,32 @@ class Game:
 
     def draw_border(self):
         line = "-+"
-        for i in range(0,self.map_width):
+        for i in range(0, self.map_width):
             line += "---+"
 
         print(line)
 
     def draw_grid(self):
-        #draw header
+        # draw header
         alphabet = "abcdefghijklmnopqrstuvwxyz"
         line = " |"
-        for i in range(0,self.map_width):
+        for i in range(0, self.map_width):
             line += " " + alphabet[i] + " |"
         print(line)
         self.draw_border()
-        for y in range(0,self.map_height):
-            line = str(y+1) + "|"
-            for x in range(0,self.map_width):
+        for y in range(0, self.map_height):
+            line = str(y + 1) + "|"
+            for x in range(0, self.map_width):
                 unitHere = None
                 for unit in self.units:
-                    if unit.position == Vector2Int(x,y):
+                    if unit.position == Vector2Int(x, y):
                         unitHere = unit
                 if unitHere:
-                    line += " "+ unitHere.char +" |"
+                    line += " " + unitHere.char + " |"
                 else:
                     line += "   |"
             print(line)
             self.draw_border()
-
-
 
 
 def handle_unit_move(unit: Unit):
@@ -132,8 +127,12 @@ def handle_unit_action(unit: Unit):
 
 
 def handle_unit_turn(team: int, unit: Unit, game: Game):
+    if unit.ai is not None:
+        unit.ai.decide_turn_action()
+        return
+
     while True:
-        print(unit.name  + "("+unit.char+")"+ " turn")
+        print(unit.name + "(" + unit.char + ")" + " turn")
         if unit.action_taken and unit.move_used:
             return
         elif unit.move_used:
@@ -162,21 +161,32 @@ def handle_unit_turn(team: int, unit: Unit, game: Game):
 def main():
     game = Game(7, 7, handle_unit_turn)
     unit = Warrior.Warrior(name="Warrior 1", team=0, start_position=Vector2Int(1, 2), game=game, char='w')
+    unit.ai = WarriorAI(unit, game)
+
     game.add_unit(unit)
 
     unit = Cleric.Cleric(name="Cleric 1", team=0, start_position=Vector2Int(0, 1), game=game, char='c')
+    unit.ai = WarriorAI(unit, game)
+
     game.add_unit(unit)
 
     unit = Mage.Mage(name="Mage 1", team=0, start_position=Vector2Int(0, 0), game=game, char='m')
+    unit.ai = WarriorAI(unit, game)
+
     game.add_unit(unit)
 
-    unit = Warrior.Warrior(name="Warrior 2", team=1, start_position=Vector2Int(3, 3), game=game, char='W')
+    unit = Warrior.Warrior(name="Warrior 2", team=1, start_position=Vector2Int.from_battleship_coord("g7"), game=game, char='W')
+    unit.ai = WarriorAI(unit, game)
     game.add_unit(unit)
 
     unit = Cleric.Cleric(name="Cleric 2", team=1, start_position=Vector2Int(4, 2), game=game, char='C')
+    unit.ai = WarriorAI(unit, game)
+
     game.add_unit(unit)
 
     unit = Mage.Mage(name="Mage 2", team=1, start_position=Vector2Int(4, 4), game=game, char='M')
+    unit.ai = WarriorAI(unit, game)
+
     game.add_unit(unit)
 
     game.roll_initiative()

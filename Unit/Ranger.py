@@ -1,6 +1,5 @@
-import BasicAttackAction
-import BasicSpellAction
-import Unit
+from Actions import BasicSpellAction, BasicAttackAction
+from Unit import Unit
 import Weapon
 from Vector2Int import Vector2Int
 
@@ -32,6 +31,7 @@ class Ranger(Unit.Unit):
         self.char = char
         self.action_taken = False
         self.move_used = False
-        self.actions.append(BasicAttackAction.BasicAttackAction(weapon=Weapon.Bow(5), owner=self))
+        self.weapon = Weapon.Bow(5)
+        self.actions.append(BasicAttackAction.BasicAttackAction(owner=self))
         self.actions.append(BasicSpellAction.BasicSpellAction(damage=65, max_range=3, chargeTicks=6, owner=self,
                                                               name="Charged Shot"))

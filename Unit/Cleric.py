@@ -1,8 +1,8 @@
 import Weapon
-from BasicAttackAction import BasicAttackAction
-from BasicSpellAction import HealingSpellAction
+from Actions.BasicAttackAction import BasicAttackAction
+from Actions.BasicSpellAction import HealingSpellAction
 from Game import Game
-from Unit import Unit
+from Unit.Unit import Unit
 from Vector2Int import Vector2Int
 
 
@@ -11,7 +11,7 @@ from Vector2Int import Vector2Int
 
 # Weapon: 3 so dmg = 3* 14 = 42 (Staves use magic attack)
 
-#Cure: 6*14*.8 = 67.2
+# Cure: 6*14*.8 = 67.2
 class Cleric(Unit):
     def __init__(self,
                  name: str,
@@ -33,6 +33,7 @@ class Cleric(Unit):
         self.char = char
         self.action_taken = False
         self.move_used = False
-        self.actions.append(BasicAttackAction(weapon=Weapon.Staff(3), owner=self))
+        self.weapon = Weapon.Staff(3)
+        self.actions.append(BasicAttackAction(owner=self))
         self.actions.append(
             HealingSpellAction(power=6, max_range=3, chargeTicks=3, owner=self, name="Heal"))

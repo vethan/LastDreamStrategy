@@ -15,18 +15,25 @@ class Vector2Int:
         return Vector2Int(self.x, self.y)
 
     @classmethod
+    def get_adjacent_space_list(cls, position):
+        result = [Vector2Int(position.x, position.y + 1), Vector2Int(position.x + 1, position.y),
+                  Vector2Int(position.x, position.y - 1), Vector2Int(position.x - 1, position.y)]
+
+        return result
+
+    @classmethod
     def from_battleship_coord(cls, input_value: str):
         alpha_section = input_value[0]
         digit_section = input_value[1:]
         x = ord(alpha_section) - 96
         y = int(digit_section)
-        return Vector2Int(x-1, y-1)
+        return Vector2Int(x - 1, y - 1)
 
     @classmethod
     def to_battleship_coord(cls, input_value):
         alpha = "abcdefghijklmnopqrstuvwxyz"
         coord = alpha[input_value.x]
-        coord += str(input_value.y+1)
+        coord += str(input_value.y + 1)
         return coord
 
     @classmethod
@@ -42,4 +49,4 @@ class Vector2Int:
 
     @classmethod
     def manhattan_distance(cls, position, new_position):
-        return abs(position.x-new_position.x) + abs(position.y-new_position.y)
+        return abs(position.x - new_position.x) + abs(position.y - new_position.y)

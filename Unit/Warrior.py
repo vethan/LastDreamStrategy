@@ -1,5 +1,5 @@
-import BasicAttackAction
-import Unit
+from Actions import BasicAttackAction
+from Unit import Unit
 import Weapon
 from Vector2Int import Vector2Int
 
@@ -17,7 +17,7 @@ class Warrior(Unit.Unit):
                  start_position: Vector2Int,
                  char: str = 'w'):
         super().__init__(name=name,
-                         speed=8,
+                         speed=28,
                          move=3,
                          max_hp=279,
                          eva=10,
@@ -32,7 +32,8 @@ class Warrior(Unit.Unit):
         self.defending = False
         self.action_taken = False
         self.move_used = False
-        self.actions.append(BasicAttackAction.BasicAttackAction(weapon=Weapon.Sword(5,0), owner=self))
+        self.weapon = Weapon.Sword(5, 0)
+        self.actions.append(BasicAttackAction.BasicAttackAction(owner=self))
         self.actions.append(DefendAction(self))
 
     def defend(self):

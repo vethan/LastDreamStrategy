@@ -22,6 +22,7 @@ class Unit(TimelineObject):
         self.team = team
         self.game = game
         self.char ="u"
+        self.ai = None
         self.max_hp = max_hp
         self.evade = eva
         self.faith = faith
@@ -32,6 +33,7 @@ class Unit(TimelineObject):
         self.action_taken = False
         self.move_used = False
         self.actions = []
+        self.weapon = None
 
     def __str__(self):
         return self.name + "(" + self.char + ")" + "[" + str(self.hp) + "/" + str(
