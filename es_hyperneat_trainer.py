@@ -1,6 +1,5 @@
-import os
-
 import neat
+import neat.nn
 import numpy
 
 # 2-input XOR inputs and expected outputs.
@@ -9,10 +8,44 @@ import AuthoredAI.WarriorAI
 import Game
 import Unit.Warrior
 import Vector2Int
-from pureples.shared import visualize
 
+try:
+    import cPickle as pickle
+except:
+    import pickle
+from pureples.shared.substrate import Substrate
+from pureples.shared.visualize import draw_net
+from pureples.es_hyperneat.es_hyperneat import ESNetwork
+
+# Network inputs and expected outputs.
 xor_inputs = [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0), (1.0, 1.0)]
 xor_outputs = [(0.0,), (1.0,), (1.0,), (0.0,)]
+
+grid = []
+for x in range(0, 6):
+    for y in range(0, 6):
+        grid.append((x, y))
+
+input_coordinates = grid + grid
+
+output_coordinates = [(0, 0)] + grid + grid
+
+sub = Substrate(input_coordinates, output_coordinates)
+
+# ES-HyperNEAT specific parameters.
+params = {"initial_depth": 2,
+          "max_depth": 3,
+          "variance_threshold": 0.03,
+          "band_threshold": 0.3,
+          "iteration_level": 1,
+          "division_threshold": 0.5,
+          "max_weight": 10.0,
+          "activation": "sigmoid"}
+
+# Config for CPPN.
+config = neat.config.Config(neat.genome.DefaultGenome, neat.reproduction.DefaultReproduction,
+                            neat.species.DefaultSpeciesSet, neat.stagnation.DefaultStagnation,
+                            'config_cppn_xor')
 
 move_adjustments = [Vector2Int.Vector2Int(0, 3),
                     Vector2Int.Vector2Int(-1, 2),
@@ -73,7 +106,9 @@ def setup_game(net):
 
 
 def eval_genome(genome, config, display_game=False):
-    net = neat.nn.FeedForwardNetwork.create(genome, config)
+    cppn = neat.nn.FeedForwardNetwork.create(genome, config)
+    network = ESNetwork(sub, cppn, params)
+    net = network.create_phenotype_network()
     game = setup_game(net)
     while game.running:
         game.advance()
@@ -154,48 +189,45 @@ def handle_turn(team, unit, game, net):
             unit.move_to(move_point)
 
 
-def run(config_file):
-    # Load configuration.
-    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
-                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                         config_file)
+# Create the population and run the XOR task by providing the above fitness function.
+def run(gens):
+    pop = neat.population.Population(config)
     pe = neat.ParallelEvaluator(4, eval_genome)
 
-    #p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-299')
-    #winner = p.run(pe.evaluate, 1)
-    #eval_genome(winner, config, True)
-    # Create the population, which is the top-level object for a NEAT run.
-    p = neat.Population(config)
+    stats = neat.statistics.StatisticsReporter()
+    pop.add_reporter(stats)
+    pop.add_reporter(neat.reporting.StdOutReporter(True))
 
-    # Add a stdout reporter to show progress in the terminal.
-    p.add_reporter(neat.StdOutReporter(True))
-    stats = neat.StatisticsReporter()
-    p.add_reporter(stats)
-    p.add_reporter(neat.Checkpointer(5))
+    winner = pop.run(pe.evaluate, gens)
+    print("es_hyperneat_xor_large done")
+    return winner
 
-    # Run for up to 300 generations.
-    winner = p.run(pe.evaluate, 300)
 
-    # Display the winning genome.
+# If run as script.
+if __name__ == '__main__':
+
+    # cProfile.run('run(2)', 'restats')
+    # import pstats
+
+    # p = pstats.Stats('restats')
+    # p.sort_stats('cumulative').print_stats(20)
+    winner = run(300)
     print('\nBest genome:\n{!s}'.format(winner))
 
-    # Show output of the most fit genome against training data.
+    # Verify network output against training data.
     print('\nOutput:')
-    winner_net = neat.nn.FeedForwardNetwork.create(winner, config)
-    eval_genome(winner, config, True)
+    cppn = neat.nn.FeedForwardNetwork.create(winner, config)
+    network = ESNetwork(sub, cppn, params)
+    winner_net = network.create_phenotype_network(
+        filename='es_hyperneat_xor_large_winner.png')  # This will also draw winner_net.
+    for inputs, expected in zip(xor_inputs, xor_outputs):
+        new_input = inputs + (1.0,)
+        winner_net.reset()
+        for i in range(network.activations):
+            output = winner_net.activate(new_input)
+        print("  input {!r}, expected output {!r}, got {!r}".format(inputs, expected, output))
 
-    visualize.draw_net(winner_net, filename="neat_trainer_networks")
-    # visualize.plot_stats(stats, ylog=False, view=True)
-    # visualize.plot_species(stats, view=True)
-
-    # p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-4')
-    # p.run(eval_genome, 10)
-
-
-if __name__ == '__main__':
-    # Determine path to configuration file. This path manipulation is
-    # here so that the script will run successfully regardless of the
-    # current working directory.
-    local_dir = os.path.dirname(__file__)
-    config_path = os.path.join(local_dir, 'neat.ini')
-    run(config_path)
+    # Save CPPN if wished reused and draw it to file.
+    draw_net(cppn, filename="es_hyperneat_xor_large_cppn")
+    with open('es_hyperneat_xor_large_cppn.pkl', 'wb') as output:
+        pickle.dump(cppn, output, pickle.HIGHEST_PROTOCOL)

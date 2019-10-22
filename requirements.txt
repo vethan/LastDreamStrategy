@@ -1,2 +1,5 @@
 neat-python
 numpy
+graphviz
+matplotlib
+gym
