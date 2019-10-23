@@ -34,7 +34,7 @@ class Warrior(Unit.Unit):
         self.move_used = False
         self.weapon = Weapon.Sword(5, 0)
         self.actions.append(BasicAttackAction.BasicAttackAction(owner=self))
-        self.actions.append(DefendAction(self))
+        # self.actions.append(DefendAction(self))
 
     def defend(self):
         self.defending = True

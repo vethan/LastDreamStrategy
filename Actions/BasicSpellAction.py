@@ -54,12 +54,17 @@ class BasicSpellTarget(TimelineObject):
 
     def damage_calc(self):
         return int(self.owner.owner.m_attack * self.owner.power * (self.owner.owner.faith * 0.01) * (
-                    self.target.faith * 0.01))
+                self.target.faith * 0.01))
 
     def select(self):
         self.owner.owner.game.timeline_objects.append(self)
 
     def execute(self):
+        user = self.owner.owner
+
+        if user.debug_print:
+            print(str(user) + " used " + self.owner.name + " on " + str(self.target))
+
         self.target.damage(self.damage_calc())
 
 
@@ -71,6 +76,11 @@ class AOESpellTarget(BasicSpellTarget):
         self.range = range
 
     def execute(self):
+        user = self.owner.owner
+
+        if user.debug_print:
+            print(str(user) + " used " + self.owner.name + " on " + str(self.target))
+
         for unit in self.owner.game.units:
-            if (Vector2Int.Vector2Int.manhattan_distance(self.target.position, self.owner.position) <= self.max_range):
-                self.target.damage(self.damage_calc())
+            if Vector2Int.Vector2Int.manhattan_distance(self.target.position, unit.position) <= self.range:
+                unit.damage(self.damage_calc())

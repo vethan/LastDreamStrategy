@@ -4,8 +4,8 @@ import random
 import Unit.Cleric
 import Unit.Mage
 import Unit.Ranger
-import Unit.Warrior
 import Unit.Unit
+import Unit.Warrior
 from AuthoredAI.WarriorAI import WarriorAI
 from Vector2Int import Vector2Int
 
@@ -27,34 +27,39 @@ class Game:
         self.timeline_objects.append(unit)
         self.units.append(unit)
 
-    def get_unit_from_point(self, point : Vector2Int):
+    def get_unit_from_point(self, point: Vector2Int):
         for unit in self.units:
             if unit.position == point:
                 return unit
 
         return None
 
-    def advance(self):
+    def advance(self, advance_until_action=True):
+        action_taken = False
         self.timeline_objects.sort(key=lambda timeline_object: timeline_object.steps_to_ready())
-        to_be_removed = []
-        for x in self.timeline_objects:
-            x.end_turn()
-            if x.CT >= 100:
-                x.execute()
-                if not isinstance(x, Unit.Unit.Unit):
-                    to_be_removed.append(x)
-                else:
-                    x.end_turn()
-        team1_unit = False
-        team0_unit = False
-        for unit in self.units:
-            team0_unit |= unit.team == 0
-            team1_unit |= unit.team == 1
 
-        self.running = team0_unit and team1_unit
+        while not action_taken:
+            action_taken = not advance_until_action
+            to_be_removed = []
+            for x in self.timeline_objects:
+                x.end_turn()
+                if x.CT >= 100:
+                    action_taken = True
+                    x.execute()
+                    if not isinstance(x, Unit.Unit.Unit):
+                        to_be_removed.append(x)
+                    else:
+                        x.end_turn()
+            team1_unit = False
+            team0_unit = False
+            for unit in self.units:
+                team0_unit |= unit.team == 0
+                team1_unit |= unit.team == 1
 
-        for x in to_be_removed:
-            self.timeline_objects.remove(x)
+            self.running = team0_unit and team1_unit
+
+            for x in to_be_removed:
+                self.timeline_objects.remove(x)
 
     def is_empty(self, position: Vector2Int):
         for x in self.units:
@@ -186,37 +191,41 @@ def main():
     unit = Unit.Warrior.Warrior(name="Warrior 1", team=0, start_position=Vector2Int(1, 2), game=game, char='w')
     unit.ai = WarriorAI(unit, game)
     game.add_unit(unit)
+    unit.debug_print = True
 
     unit = Unit.Cleric.Cleric(name="Cleric 1", team=0, start_position=Vector2Int(0, 1), game=game, char='c')
     unit.ai = WarriorAI(unit, game)
-
+    unit.debug_print = True
     game.add_unit(unit)
 
     unit = Unit.Mage.Mage(name="Mage 1", team=0, start_position=Vector2Int(0, 0), game=game, char='m')
     unit.ai = WarriorAI(unit, game)
-
+    unit.debug_print = True
     game.add_unit(unit)
 
-    unit = Unit.Warrior.Warrior(name="Warrior 2", team=1, start_position=Vector2Int.from_battleship_coord("g7"), game=game,
-                           char='W')
+    unit = Unit.Warrior.Warrior(name="Warrior 2", team=1, start_position=Vector2Int.from_battleship_coord("g7"),
+                                game=game,
+                                char='W')
     unit.ai = WarriorAI(unit, game)
     game.add_unit(unit)
+    unit.debug_print = True
 
     unit = Unit.Cleric.Cleric(name="Cleric 2", team=1, start_position=Vector2Int(4, 2), game=game, char='C')
     unit.ai = WarriorAI(unit, game)
+    unit.debug_print = True
 
     game.add_unit(unit)
 
     unit = Unit.Mage.Mage(name="Mage 2", team=1, start_position=Vector2Int(4, 4), game=game, char='M')
     unit.ai = WarriorAI(unit, game)
-
+    unit.debug_print = True
     game.add_unit(unit)
 
     game.roll_initiative()
 
     while game.running:
-        game.advance()
         cls()
+        game.advance()
         game.draw_grid()
         input(game.turn_order_string())
 

@@ -47,6 +47,7 @@ def setup_game(net):
                                 start_position=Vector2Int.Vector2Int.from_battleship_coord("b1"),
                                 game=game, char='w')
     unit.ai = None
+    unit.debug_print = True
     game.add_unit(unit)
 
     unit = Unit.Warrior.Warrior(name="Warrior 1", team=0,

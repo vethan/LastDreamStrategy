@@ -44,4 +44,6 @@ class BasicAttackTarget:
     def select(self):
         # TODO: roll to hit
         user = self.owner.owner
+        if user.debug_print:
+            print(str(user) + " basic attacked " + str(self.target))
         self.target.damage(user.weapon.damage(user.m_attack, user.p_attack, user.speed))

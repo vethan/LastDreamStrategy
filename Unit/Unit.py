@@ -35,6 +35,7 @@ class Unit(TimelineObject):
         self.move_used = False
         self.actions = []
         self.weapon = None
+        self.debug_print = False
 
     def __str__(self):
         return self.name + "(" + self.char + ")" + "[" + str(self.hp) + "/" + str(
@@ -54,6 +55,10 @@ class Unit(TimelineObject):
                 or Vector2Int.Vector2Int.manhattan_distance(self.position, new_position) > self.move):
             return False
 
+        if self.debug_print:
+            print(str(self) + " moved to "
+                  + Vector2Int.Vector2Int.to_battleship_coord(new_position))
+
         self.position = new_position.clone()
         self.move_used = True
         return True
@@ -62,8 +67,17 @@ class Unit(TimelineObject):
         self.game.handle_unit_action(self.team, self, self.game)
 
     def damage(self, amount):
+        original_hp = self.hp
         self.hp -= amount
         self.hp = max(min(self.max_hp, self.hp), 0)
+        actual_damage = original_hp - self.hp
+
+        if self.debug_print:
+            if actual_damage < 0:
+                print(str(self) + " healed by " + str(-actual_damage))
+            elif actual_damage > 0:
+                print(str(self) + " damgaed by " + str(actual_damage))
+
         if self.hp <= 0:
             self.game.timeline_objects.remove(self)
             self.game.units.remove(self)

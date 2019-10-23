@@ -1,8 +1,8 @@
-from Actions import BasicAttackAction
 import AuthoredAI.CharacterAI
+from Actions import BasicAttackAction
 
 
-class WarriorAI(AuthoredAI.CharacterAI.CharacterAI):
+class RangerAI(AuthoredAI.CharacterAI.CharacterAI):
     def __init__(self, controlled_unit, game):
         super().__init__(controlled_unit, game)
 

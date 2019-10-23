@@ -33,5 +33,5 @@ class Ranger(Unit.Unit):
         self.move_used = False
         self.weapon = Weapon.Bow(5)
         self.actions.append(BasicAttackAction.BasicAttackAction(owner=self))
-        self.actions.append(BasicSpellAction.BasicSpellAction(damage=65, max_range=3, chargeTicks=6, owner=self,
-                                                              name="Charged Shot"))
+        #self.actions.append(BasicSpellAction.BasicSpellAction(damage=65, max_range=3, chargeTicks=6, owner=self,
+        #                                                      name="Charged Shot"))
