@@ -18,7 +18,7 @@ class Weapon:
 
 class Bow(Weapon):
     def __init__(self, attack: int):
-        super().__init__(attack, 0, 0, min_range=3, max_range=5)
+        super().__init__(attack, 0, 0, min_range=2, max_range=3)
 
     def damage(self, physical_attack: int, magic_attack: int, speed: int) -> int:
         return ((physical_attack + speed) / 2) * self.attack

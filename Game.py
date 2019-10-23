@@ -6,6 +6,7 @@ import Unit.Mage
 import Unit.Ranger
 import Unit.Unit
 import Unit.Warrior
+from AuthoredAI.RangerAI import RangerAI
 from AuthoredAI.WarriorAI import WarriorAI
 from Vector2Int import Vector2Int
 
@@ -193,8 +194,8 @@ def main():
     game.add_unit(unit)
     unit.debug_print = True
 
-    unit = Unit.Cleric.Cleric(name="Cleric 1", team=0, start_position=Vector2Int(0, 1), game=game, char='c')
-    unit.ai = WarriorAI(unit, game)
+    unit = Unit.Ranger.Ranger(name="Ranger 1", team=0, start_position=Vector2Int(0, 1), game=game, char='r')
+    unit.ai = RangerAI(unit, game)
     unit.debug_print = True
     game.add_unit(unit)
 
@@ -210,8 +211,8 @@ def main():
     game.add_unit(unit)
     unit.debug_print = True
 
-    unit = Unit.Cleric.Cleric(name="Cleric 2", team=1, start_position=Vector2Int(4, 2), game=game, char='C')
-    unit.ai = WarriorAI(unit, game)
+    unit = Unit.Ranger.Ranger(name="Ranger 2", team=1, start_position=Vector2Int(4, 2), game=game, char='R')
+    unit.ai = RangerAI(unit, game)
     unit.debug_print = True
 
     game.add_unit(unit)

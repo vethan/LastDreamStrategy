@@ -41,13 +41,13 @@ move_adjustments = [Vector2Int.Vector2Int(0, 3),
                     Vector2Int.Vector2Int(0, -3)]
 
 
-def setup_game(net):
+def setup_game(net, debug=False):
     game = Game.Game(6, 6, lambda team, unit, game: handle_turn(team, unit, game, net))
     unit = Unit.Warrior.Warrior(name="Warrior 1", team=0,
                                 start_position=Vector2Int.Vector2Int.from_battleship_coord("b1"),
                                 game=game, char='w')
     unit.ai = None
-    unit.debug_print = True
+    unit.debug_print = debug
     game.add_unit(unit)
 
     unit = Unit.Warrior.Warrior(name="Warrior 1", team=0,
@@ -55,6 +55,8 @@ def setup_game(net):
                                 game=game,
                                 char='w')
     unit.ai = None
+    unit.debug_print = debug
+
     game.add_unit(unit)
 
     unit = Unit.Warrior.Warrior(name="Warrior 2", team=1,
@@ -62,6 +64,8 @@ def setup_game(net):
                                 game=game,
                                 char='W')
     unit.ai = AuthoredAI.WarriorAI.WarriorAI(unit, game)
+    unit.debug_print = debug
+
     game.add_unit(unit)
 
     unit = Unit.Warrior.Warrior(name="Warrior 2", team=1,
@@ -69,13 +73,15 @@ def setup_game(net):
                                 game=game,
                                 char='W')
     unit.ai = AuthoredAI.WarriorAI.WarriorAI(unit, game)
+    unit.debug_print = debug
+
     game.add_unit(unit)
     return game
 
 
 def eval_genome(genome, config, display_game=False):
     net = neat.nn.FeedForwardNetwork.create(genome, config)
-    game = setup_game(net)
+    game = setup_game(net, display_game)
     while game.running:
         game.advance()
         if display_game:
@@ -162,9 +168,9 @@ def run(config_file):
                          config_file)
     pe = neat.ParallelEvaluator(4, eval_genome)
 
-    #p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-299')
-    #winner = p.run(pe.evaluate, 1)
-    #eval_genome(winner, config, True)
+    # p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-299')
+    # winner = p.run(pe.evaluate, 1)
+    # eval_genome(winner, config, True)
     # Create the population, which is the top-level object for a NEAT run.
     p = neat.Population(config)
 

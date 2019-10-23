@@ -44,5 +44,3 @@ class CharacterAI:
         available_spaces.sort(key=lambda point: Vector2Int.manhattan_distance(unit.position, point))
         # First attempt to move to adjacent spots
         self.unit.move_to(available_spaces[0])
-
-        # Move as close as possible

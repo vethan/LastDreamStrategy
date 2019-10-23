@@ -17,7 +17,7 @@ class Warrior(Unit.Unit):
                  start_position: Vector2Int,
                  char: str = 'w'):
         super().__init__(name=name,
-                         speed=28,
+                         speed=8,
                          move=3,
                          max_hp=279,
                          eva=10,
