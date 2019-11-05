@@ -3,11 +3,12 @@ import os
 import neat
 import numpy
 
-# 2-input XOR inputs and expected outputs.
 import Actions.BasicAttackAction
 import AuthoredAI.WarriorAI
+import AuthoredAI.RangerAI
 import Game
 import Unit.Warrior
+import Unit.Ranger
 import Vector2Int
 from pureples.shared import visualize
 
@@ -43,9 +44,9 @@ move_adjustments = [Vector2Int.Vector2Int(0, 3),
 
 def setup_game(net, debug=False):
     game = Game.Game(6, 6, lambda team, unit, game: handle_turn(team, unit, game, net))
-    unit = Unit.Warrior.Warrior(name="Warrior 1", team=0,
+    unit = Unit.Ranger.Ranger(name="Ranger 1", team=0,
                                 start_position=Vector2Int.Vector2Int.from_battleship_coord("b1"),
-                                game=game, char='w')
+                                game=game, char='r')
     unit.ai = None
     unit.debug_print = debug
     game.add_unit(unit)
@@ -59,11 +60,11 @@ def setup_game(net, debug=False):
 
     game.add_unit(unit)
 
-    unit = Unit.Warrior.Warrior(name="Warrior 2", team=1,
+    unit = Unit.Ranger.Ranger(name="Ranger 2", team=1,
                                 start_position=Vector2Int.Vector2Int.from_battleship_coord("f5"),
                                 game=game,
-                                char='W')
-    unit.ai = AuthoredAI.WarriorAI.WarriorAI(unit, game)
+                                char='R')
+    unit.ai = AuthoredAI.RangerAI.RangerAI(unit, game)
     unit.debug_print = debug
 
     game.add_unit(unit)

@@ -26,6 +26,36 @@ class CharacterAI:
 
         return result
 
+    def get_enemies_in_moveable_attack_range(self, min_attack_range, max_attack_range):
+        move = self.unit.move
+        if self.unit.move_used:
+            move = 0
+
+        possible_spaces_to_attack_from = self.get_unit_move_spaces(move)
+        possible_spaces_to_attack_from.append(self.unit.position)
+
+        unit_list = []
+        for unit in self.game.units:
+            if unit.team == self.unit.team:
+                continue
+            for point in possible_spaces_to_attack_from:
+                if min_attack_range <= Vector2Int.manhattan_distance(unit.position, point) <= max_attack_range:
+                    unit_list.append(unit)
+                    break
+
+        unit_list.sort(key=lambda x: x.hp)
+        return unit_list
+
+    def get_enemies_by_health(self):
+        unit_list = []
+        for unit in self.game.units:
+            if unit.team == self.unit.team:
+                continue
+            unit_list.append(unit)
+
+        unit_list.sort(key=lambda x: x.hp)
+        return unit_list
+
     def get_enemies_by_distance(self):
         unit_list = []
         for unit in self.game.units:

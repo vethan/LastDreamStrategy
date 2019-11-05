@@ -7,9 +7,13 @@ class WarriorAI(AuthoredAI.CharacterAI.CharacterAI):
         super().__init__(controlled_unit, game)
 
     def decide_turn_action(self):
-        ordered_enemies = self.get_enemies_by_distance()
+        ordered_enemies = self.get_enemies_in_moveable_attack_range(self.unit.weapon.min_range,
+                                                                    self.unit.weapon.max_range)
         if len(ordered_enemies) == 0:
-            return
+            ordered_enemies = self.get_enemies_by_distance()
+            if len(ordered_enemies) == 0:
+                return
+
         closest_enemy = ordered_enemies[0]
         # Move towards closest enemy
         self.move_towards_unit(closest_enemy, self.unit.move)
